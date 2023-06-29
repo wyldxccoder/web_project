@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--xml映射文件的名称与mapper接口名称保持一致,并且将xml映射文件和mapper放置在相同包下(同包同名)-->
+<!--xml映射文件的namespace属性为mapper接口全限定名称一致-->
+<!--xml映射文件中sql语句中的id与mapper接口中方法名一致,返回值类型一致-->
+<mapper namespace="com.itheima.mapper.EmpMapper">
+<!--   <sql>定义可重用的sql片段-->
+    <sql id="commonSelect">
+        select id, username, password, name, gender, image, job, entrydate, dept_id, create_time, update_time
+    </sql>
+
+    <!--    resultType单条记录封装的类型-->
+    <select id="list" resultType="com.itheima.pojo.Emp">
+<!--        <include/> 通过属性refid,指定sql片段-->
+        <include refid="commonSelect"/>
+        from emp
+        <!--动态查询sql <where><if><if><where>-->
+        <where>
+            <if test="name !=null ">
+                name like concat('%', #{name}, '%')
+            </if>
+            <if test="gender !=null">
+                and gender = #{gender}
+            </if>
+            <if test=" begin !=null and end !=null">
+                and entrydate between #{begin} and #{end}
+            </if>
+        </where>
+        order by update_time desc
+    </select>
+    <!--动态更新sql <set><if><if><set>-->
+    <update id="update">
+        update emp
+        <set>
+            <if test="username !=null">
+                username=#{username},
+            </if>
+        <if test="name !=null">
+            name=#{name},
+        </if>
+        <if test="gender !=null">
+            gender=#{gender},
+        </if>
+        <if test="image !=null">
+            image=#{image},
+        </if>
+        <if test="job !=null">
+            job=#{job},
+        </if>
+        <if test="entrydate !=null">
+            entrydate=#{entrydate},
+        </if>
+        <if test="deptId !=null">
+            dept_id=#{deptId},
+        </if>
+        <if test="updateTime !=null">
+            update_time=#{updateTime}
+        </if>
+        </set>
+            <where>
+                <if test="id !=null" >
+                     id = #{id}
+                </if>
+            </where>
+    </update>
+<!--    批量删除员工-->
+<!--    foreach-->
+<!--    collection:遍历集合-->
+<!--    item:遍历出来的元素-->
+<!--    separator:分隔符-->
+<!--    open:遍历前拼接的sql片段-->
+<!--    close:遍历后拼接的sql片段-->
+    <delete id="deleteByIds">
+                delete from emp where id in
+                <foreach collection="ids" item="id" separator="," open="(" close=")">
+                    #{id}
+                </foreach>
+    </delete>
+</mapper>
